@@ -1,0 +1,10 @@
+{
+  "name": "TSEngine",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "nataset <nataset.t@ku.th>",
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^4.5.3"
+  }
+}
