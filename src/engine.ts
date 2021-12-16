@@ -3,9 +3,9 @@ namespace TSE {
      * the main engine class
      */
     export class Engine {
-        private _canvas: HTMLCanvasElement | undefined;
-        private _shader: Shader | undefined;
-        private _buffer: WebGLBuffer | undefined;
+        private _canvas: HTMLCanvasElement | null = null;
+        private _shader!: Shader;
+        private _buffer: GLBuffer | null = null;
 
         /**
          * Create a new engine.
@@ -21,7 +21,7 @@ namespace TSE {
             gl.clearColor(0, 0, 0, 1);
 
             this.loadShaders();
-            this._shader?.use();
+            this._shader.use();
 
             this.createBuffer();
             this.resize();
@@ -32,7 +32,7 @@ namespace TSE {
          *  Resizes the canvas to fit the window
          */
         public resize(): void {
-            if (this._canvas !== undefined) {
+            if (this._canvas !== null) {
                 this._canvas.width = window.innerWidth;
                 this._canvas.height = window.innerHeight;
 
@@ -40,34 +40,35 @@ namespace TSE {
             }
         }
 
-        private createBuffer(): void {
-            this._buffer = gl.createBuffer() as WebGLBuffer;
-
-            let vertices = [0.5, -0.5, 0, -0.5, -0.5, 0, 0, 0.5, 0];
-            gl.enableVertexAttribArray(0);
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, this._buffer);
-
-            gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-
-            gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-            gl.disableVertexAttribArray(0);
-        }
-
         private loop(): void {
             gl.clear(gl.COLOR_BUFFER_BIT);
 
-            gl.bindBuffer(gl.ARRAY_BUFFER, this._buffer as WebGLBuffer);
-            gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray(0);
-            gl.drawArrays(gl.TRIANGLES, 0, 3);
+            // Set uniform.
+            let colorPosition = this._shader.getUnformLocation('u_color');
+            gl.uniform4f(colorPosition, 1, 0.5, 0, 1);
+
+            this._buffer?.bind();
+            this._buffer?.draw();
 
             requestAnimationFrame(() => {
                 this.loop();
             });
+        }
+
+        private createBuffer(): void {
+            this._buffer = new GLBuffer(3);
+
+            let positionAttribute = new AttributeInfo();
+            positionAttribute.location = this._shader.getAttributeLocation('a_position');
+            positionAttribute.offset = 0;
+            positionAttribute.size = 3;
+            this._buffer.addAttributeLocation(positionAttribute);
+
+            let vertices = [0.5, -0.5, 0, -0.5, -0.5, 0, 0, 0.5, 0];
+
+            this._buffer.pushBackData(vertices);
+            this._buffer.upload();
+            this._buffer.unbind();
         }
 
         private loadShaders(): void {
@@ -80,8 +81,10 @@ namespace TSE {
 
             let fragmentShaderSource = `
                 precision mediump float;
+                uniform vec4 u_color;
+
                 void main() {
-                    gl_FragColor = vec4(1.0);
+                    gl_FragColor = u_color;
                 }
             `;
 
