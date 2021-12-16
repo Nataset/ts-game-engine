@@ -2,7 +2,7 @@ namespace TSE {
     /**
      * The WebGL redering context.
      */
-    export var gl: WebGLRenderingContext | null;
+    export var gl: WebGLRenderingContext;
 
     /**
      * Responsible for setting up a WebGL rendering context.
@@ -25,7 +25,8 @@ namespace TSE {
                 canvas = document.createElement('canvas') as HTMLCanvasElement;
                 document.body.appendChild(canvas);
             }
-            gl = canvas.getContext('webgl');
+
+            gl = canvas.getContext('webgl') as WebGLRenderingContext;
             if (gl === undefined && gl === null) {
                 throw new Error('Unable to initialize WebGL!');
             }
