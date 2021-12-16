@@ -48,7 +48,7 @@ namespace TSE {
             gl.compileShader(shader);
             let error = gl.getShaderInfoLog(shader);
             if (error !== '') {
-                throw new Error(' Error compiling shader: ' + error);
+                throw new Error(' Error complie shader ' + error);
             }
 
             return shader;

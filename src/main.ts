@@ -4,7 +4,6 @@ var engine: TSE.Engine;
 window.onload = () => {
     engine = new TSE.Engine();
     engine.start();
-    engine.resize();
 };
 
 window.onresize = () => {
